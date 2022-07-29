@@ -41,7 +41,7 @@ namespace CrawlPlainWebsites
             var asyncMain = MainAsync();
 
             // Wait for user to end the process            '
-            while(true)
+            while(!asyncMain.IsCompleted)
             {
                 await asyncMain;
                 if (asyncMain.IsFaulted)
@@ -51,14 +51,10 @@ namespace CrawlPlainWebsites
                     asyncMain.Dispose();
                     asyncMain = MainAsync();
                 }
-                if (asyncMain.IsCompleted)
-                {
-                    Console.WriteLine("asyncMain completed, no more website URLs found on the main index page of every domain.");
-                    asyncMain.Dispose();
-                    Console.ReadKey();
-                    break;
-                }
             }
+            Console.WriteLine("asyncMain completed, no more website URLs found on the main index page of every domain.");
+            asyncMain.Dispose();
+            Console.ReadKey();
         }
 
         private static async Task MainAsync()
