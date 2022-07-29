@@ -24,7 +24,7 @@ namespace CrawlPlainWebsites
         static readonly string filePath = "out.txt";
         #endregion
 
-        static void Main(string[] args)
+        static async void Main(string[] args)
         {
             // Load progress if it exists
             if (File.Exists(filePath))
@@ -43,7 +43,7 @@ namespace CrawlPlainWebsites
             // Wait for user to end the process            '
             while(true)
             {
-                Thread.Sleep(100);
+                await asyncMain;
                 if (asyncMain.IsFaulted)
                 {
                     Console.WriteLine("asyncMain faulted");
@@ -53,9 +53,10 @@ namespace CrawlPlainWebsites
                 }
                 if (asyncMain.IsCompleted)
                 {
-                    Console.WriteLine("asyncMain completed");
+                    Console.WriteLine("asyncMain completed, no more website URLs found on the main index page of every domain.");
                     asyncMain.Dispose();
                     Console.ReadKey();
+                    break;
                 }
             }
         }
