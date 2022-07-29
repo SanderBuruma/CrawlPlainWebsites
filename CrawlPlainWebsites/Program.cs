@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CrawlPlainWebsites
@@ -39,9 +40,24 @@ namespace CrawlPlainWebsites
 
             var asyncMain = MainAsync();
 
-            // Wait for user to end the process
-            Console.ReadKey();
-            SaveProgress();
+            // Wait for user to end the process            '
+            while(true)
+            {
+                Thread.Sleep(100);
+                if (asyncMain.IsFaulted)
+                {
+                    Console.WriteLine("asyncMain faulted");
+                    Console.WriteLine(asyncMain.Exception.ToString());
+                    asyncMain.Dispose();
+                    asyncMain = MainAsync();
+                }
+                if (asyncMain.IsCompleted)
+                {
+                    Console.WriteLine("asyncMain completed");
+                    asyncMain.Dispose();
+                    Console.ReadKey();
+                }
+            }
         }
 
         private static async Task MainAsync()
@@ -70,7 +86,6 @@ namespace CrawlPlainWebsites
                     if (!domainUrls.Contains(v))
                     {
                         domainUrls.Add(v);
-                        Console.WriteLine(String.Format("{0:N0}:{1}", domainUrls.Count() - index, v));
                     }
                 }
 
