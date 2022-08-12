@@ -16,6 +16,7 @@ namespace CrawlPlainWebsites
         static List<string> domainUrls = new List<string> { "cnn.com" };
         static List<Task<string>> getTasks = new List<Task<string>>();
         static int index = 0;
+        static SynchronizationContext primarySyncContext = null;
         #endregion
 
         #region Settings
@@ -24,8 +25,12 @@ namespace CrawlPlainWebsites
         static readonly string filePath = "out.txt";
         #endregion
 
-        static async void Main(string[] args)
+        #region Methods
+        #region Mains
+        static void Main(string[] args)
         {
+            primarySyncContext = SynchronizationContext.Current ?? new SynchronizationContext();
+
             // Load progress if it exists
             if (File.Exists(filePath))
             {
@@ -43,7 +48,7 @@ namespace CrawlPlainWebsites
             // Wait for user to end the process            '
             while(!asyncMain.IsCompleted)
             {
-                await asyncMain;
+                asyncMain.Wait();
                 if (asyncMain.IsFaulted)
                 {
                     Console.WriteLine("asyncMain faulted");
@@ -59,6 +64,7 @@ namespace CrawlPlainWebsites
 
         private static async Task MainAsync()
         {
+
             RefillRequestQue();
             while (getTasks.Count > 0)
             {
@@ -89,7 +95,9 @@ namespace CrawlPlainWebsites
                 RefillRequestQue();
             }
         }
+        #endregion
 
+        #region Private Methods
         private static void SaveProgress()
         {
             domainUrls.Insert(0, (index - maxTasks).ToString());
@@ -113,5 +121,7 @@ namespace CrawlPlainWebsites
             var temp = await hc.GetAsync("https://" + url);
             return await temp.Content.ReadAsStringAsync();
         }
+        #endregion
+        #endregion
     }
 }
